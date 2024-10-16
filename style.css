@@ -1,0 +1,19 @@
+.navbar-brand {
+  font-weight: bold;
+}
+
+.jumbotron {
+  background-color: #ffba3b;
+}
+
+.display-4 {
+  font-weight: 400;
+}
+
+.lead {
+  font-weight: 0;
+}
+
+#program {
+  background-color: #004aad;
+}
