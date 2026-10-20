@@ -1,41 +1,54 @@
 <?php
 
-require './../config/db.php';
+require_once __DIR__ . '/../config/helpers.php';
+require_admin();
+require_once __DIR__ . '/../config/db.php';
 
-if (isset($_POST['submit'])) {
-    global $db_connect;
-
-    // Ambil data dari form
-    $name = $_POST['name'];
-    $price = $_POST['price'];
-    $image = $_FILES['image']['name'];
-    $tempImage = $_FILES['image']['tmp_name'];
-
-    // Generate nama file unik
-    $randomFilename = time() . '-' . md5(rand()) . '-' . $image;
-
-    // Set direktori upload
-    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/pertemuan-6/uploads/';
-
-    // Periksa apakah folder uploads ada, jika tidak, buat foldernya
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true); // Buat folder dengan izin tulis
-    }
-
-    // Tentukan jalur penyimpanan file
-    $uploadPath = $uploadDir . $randomFilename;
-
-    // Pindahkan file ke folder tujuan
-    if (move_uploaded_file($tempImage, $uploadPath)) {
-        // Simpan path relatif ke database
-        $query = "INSERT INTO products (name, price, image) 
-                  VALUES ('$name', '$price', 'pertemuan-6/uploads/$randomFilename')";
-        if (mysqli_query($db_connect, $query)) {
-            echo "Berhasil upload dan data disimpan ke database.";
-        } else {
-            echo "Gagal menyimpan data ke database: " . mysqli_error($db_connect);
-        }
-    } else {
-        echo "Gagal upload file. Pastikan folder uploads memiliki izin tulis.";
-    }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to(app_url('create.php'));
 }
+
+if (!verify_csrf_token(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : null)) {
+    redirect_with_flash('create.php', 'program_form', 'Halaman ini sudah lama terbuka. Muat ulang sebelum menyimpan kelas.');
+}
+
+$name = trim(isset($_POST['name']) ? $_POST['name'] : '');
+$description = trim(isset($_POST['description']) ? $_POST['description'] : '');
+$target = trim(isset($_POST['target']) ? $_POST['target'] : '');
+$duration = trim(isset($_POST['duration']) ? $_POST['duration'] : '');
+$schedule = trim(isset($_POST['schedule']) ? $_POST['schedule'] : '');
+$price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_INT);
+$image = isset($_FILES['image']) ? $_FILES['image'] : null;
+
+if (
+    $name === '' || strlen($name) > 255 || $description === '' || strlen($description) > 5000 ||
+    strlen($target) > 160 || strlen($duration) > 120 || strlen($schedule) > 160 ||
+    $price === false || $price === null || $price < 0
+) {
+    redirect_with_flash('create.php', 'program_form', 'Periksa nama kelas, keterangannya, dan biayanya.');
+}
+
+$uploadError = '';
+$relativeImagePath = store_image_upload($image, $uploadError);
+if ($relativeImagePath === false) {
+    redirect_with_flash('create.php', 'program_form', $uploadError);
+}
+$uploadPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativeImagePath);
+
+try {
+    $statement = $db_connect->prepare(
+        'INSERT INTO courses (name, description, target, duration, `schedule`, price, image) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    );
+    $statement->bind_param('sssssis', $name, $description, $target, $duration, $schedule, $price, $relativeImagePath);
+    $statement->execute();
+    $statement->close();
+} catch (Throwable $exception) {
+    if (is_file($uploadPath)) {
+        unlink($uploadPath);
+    }
+
+    error_log('Course creation failed: ' . $exception->getMessage());
+    redirect_with_flash('create.php', 'program_form', 'Kelas belum tersimpan. Coba lagi.');
+}
+
+redirect_with_flash('show.php', 'catalog', 'Kelas berhasil ditambahkan.', 'success');

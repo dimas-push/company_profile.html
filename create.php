@@ -1,51 +1,80 @@
+<?php
+require_once __DIR__ . '/config/helpers.php';
+require_admin();
+$csrfToken = csrf_token();
+$programFormFlash = consume_flash_message('program_form');
+$activePage = 'create';
+?>
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tambah Kelas | EDUSCOPE</title>
+    <link rel="stylesheet" href="<?= e(app_url('style.css')); ?>">
 </head>
-
 <body>
-
-
-    <!-- <h1>Tambah Produk</h1>
-    <a href="show.php">Lihat data produk</a>
-    <form action="./backend/create.php" method="post" enctype="multipart/form-data">
-        <input type="text" name="name" placeholder="input nama produk">
-        <input type="number" name="price" placeholder="input harga produk">
-        <input type="file" name="image">
-        <input type="submit" value="simpan" name="submit">
-    </form> -->
-
-    <div class="container position-absolute top-50 start-50 translate-middle">
-        <h1 class="text-center">Tambah Produk</h1>
-        <a href="show.php">Lihat Data Produk</a>
-        <form action="./backend/create.php" method="post" enctype="multipart/form-data" class="row">
-            <div class="mb-3">
-                <div class="col">
-                    <label for="formGroupExampleInput2" class="form-label">Nama Produk</label>
-                    <input type="text" class="form-control" name="name" placeholder="Input Nama Produk">
+    <?php include __DIR__ . '/partials/site-nav.php'; ?>
+    <main class="admin-main">
+        <div class="container">
+            <header class="page-intro">
+                <div>
+                    <p class="eyebrow">Katalog kelas</p>
+                    <h1>Tambah kelas</h1>
+                    <p>Masukkan kelas bimbel atau kursus yang ingin ditampilkan di halaman utama.</p>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label for="formGroupExampleInput2" class="form-label">Harga Produk</label>
-                <input type="number" class="form-control" name="price" placeholder="Input Harga Produk">
-            </div>
-            <div class="mb-3">
-                <input type="file" class="form-control" name="image">
-            </div>
-            <div class="mb-3">
-                <input type="submit" value="simpan" name="submit" class="btn btn-primary">
-            </div>
-        </form>
-    </div>
-</body>
+                <a class="button button--quiet" href="<?= e(app_url('show.php')); ?>">← Kembali ke daftar</a>
+            </header>
 
+            <div class="form-layout">
+                <section class="form-card">
+                    <h2>Detail kelas</h2>
+                    <p class="form-intro">Lengkapi nama, keterangan, jadwal, dan biaya kelas.</p>
+                    <?php if ($programFormFlash): ?>
+                        <div class="flash flash--<?= e($programFormFlash['type']); ?>" role="alert"><?= e($programFormFlash['message']); ?></div>
+                    <?php endif; ?>
+                    <form action="<?= e(app_url('backend/create.php')); ?>" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfToken); ?>">
+                        <div class="field">
+                            <label for="name">Nama kelas</label>
+                            <input type="text" id="name" name="name" placeholder="Contoh: Bimbel Matematika SMP" maxlength="255" required>
+                        </div>
+                        <div class="field">
+                            <label for="description">Keterangan kelas</label>
+                            <textarea id="description" name="description" rows="5" maxlength="5000" placeholder="Apa yang akan dipelajari di kelas ini?" required></textarea>
+                        </div>
+                        <div class="field-grid">
+                            <div class="field">
+                                <label for="target">Untuk peserta <span class="optional">(opsional)</span></label>
+                                <input type="text" id="target" name="target" maxlength="160" placeholder="Contoh: SMP kelas 7–9">
+                            </div>
+                            <div class="field">
+                                <label for="duration">Lama belajar <span class="optional">(opsional)</span></label>
+                                <input type="text" id="duration" name="duration" maxlength="120" placeholder="Contoh: 8 pertemuan">
+                            </div>
+                            <div class="field field--full">
+                                <label for="schedule">Waktu belajar <span class="optional">(opsional)</span></label>
+                                <input type="text" id="schedule" name="schedule" maxlength="160" placeholder="Contoh: Sabtu, 09.00–11.00">
+                            </div>
+                            <div class="field field--full">
+                                <label for="price">Biaya kelas (Rp)</label>
+                                <input type="number" id="price" name="price" min="0" step="1" placeholder="0" required>
+                                <p class="field-hint">Isi 0 jika biayanya perlu ditanyakan terlebih dahulu.</p>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="image">Foto kelas</label>
+                            <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                            <p class="field-hint">Pilih gambar JPG, PNG, GIF, atau WebP (maksimal 5 MB).</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="button" type="submit" name="submit">Simpan kelas</button>
+                            <a class="button button--quiet" href="<?= e(app_url('show.php')); ?>">Batal</a>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+</body>
 </html>

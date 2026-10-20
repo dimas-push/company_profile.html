@@ -1,58 +1,95 @@
+<?php
+require_once __DIR__ . '/config/helpers.php';
+require_admin();
+require_once __DIR__ . '/config/db.php';
+
+$queryError = false;
+try {
+    $courses = $db_connect->query(
+        'SELECT id, name, target, duration, `schedule`, price, image FROM courses ORDER BY id DESC'
+    );
+    $courseCount = $courses->num_rows;
+} catch (mysqli_sql_exception $exception) {
+    error_log('Course list query failed: ' . $exception->getMessage());
+    $courses = null;
+    $courseCount = 0;
+    $queryError = true;
+}
+$csrfToken = csrf_token();
+$catalogFlash = consume_flash_message('catalog');
+$activePage = 'courses';
+?>
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daftar Kelas | EDUSCOPE</title>
+    <link rel="stylesheet" href="<?= e(app_url('style.css')); ?>">
 </head>
-
 <body>
+    <?php include __DIR__ . '/partials/site-nav.php'; ?>
+    <main class="admin-main">
+        <div class="container">
+            <header class="page-intro">
+                <div>
+                    <p class="eyebrow">Katalog kelas</p>
+                    <h1>Daftar kelas</h1>
+                    <p>Tambah, ubah, atau hapus kelas yang tampil di halaman utama.</p>
+                </div>
+                <a class="button" href="<?= e(app_url('create.php')); ?>"><span aria-hidden="true">＋</span> Tambah kelas</a>
+            </header>
 
-    <div class="container mt-5">
-        <h1>Data produk</h1>
-        <table border="" class="table table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Nama produk</th>
-                    <th>harga</th>
-                    <th>gambar produk</th>
-                    <th>Opsi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                require './config/db.php';
+            <?php if ($catalogFlash): ?>
+                <div class="flash flash--<?= e($catalogFlash['type']); ?>" role="status"><?= e($catalogFlash['message']); ?></div>
+            <?php endif; ?>
 
-                $products = mysqli_query($db_connect, "SELECT * FROM products");
-                $no = 1;
+            <section class="panel" aria-label="Daftar kelas">
+                <div class="catalog-toolbar">
+                    <span class="catalog-count" id="courseCount" aria-live="polite"><?= $queryError ? 'Daftar kelas belum tersedia' : (int) $courseCount . ' kelas'; ?></span>
+                    <label class="visually-hidden" for="courseSearch">Cari kelas</label>
+                    <input class="search-input" type="search" id="courseSearch" placeholder="Cari nama kelas..." autocomplete="off" aria-label="Cari kelas" <?= $queryError ? 'disabled' : ''; ?>>
+                </div>
 
-                while ($row = mysqli_fetch_assoc($products)) {
-                    ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
-                        <td><?= $row['name']; ?></td>
-                        <td><?= $row['price']; ?></td>
-                        <!-- <td><img src="<?= $row['image']; ?>" width="100"></td> -->
-                        <td><a href="<?= $row['image']; ?>" target="_blank">unduh</a></td>
-                        <td>
-                            <a href="edit.php?id=<?= $row['id']; ?>">Edit</a>
-                            <a href="delete.php?id=<?= $row['id']; ?>">Hapus</a>
-
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-
+                <?php if ($queryError): ?>
+                    <div class="empty-state" role="alert"><strong>Daftar kelas belum bisa dibuka.</strong>Coba muat ulang halaman beberapa saat lagi.</div>
+                <?php elseif ($courseCount === 0): ?>
+                    <div class="empty-state"><strong>Belum ada kelas.</strong>Pilih “Tambah kelas” untuk memasukkan kelas pertama.</div>
+                <?php else: ?>
+                    <div class="course-list">
+                        <?php while ($row = $courses->fetch_assoc()): ?>
+                            <article class="course-row" data-course-name="<?= e($row['name']); ?>">
+                                <?php if (trim($row['image']) !== ''): ?>
+                                    <img class="course-row__image" src="<?= safe_href($row['image']); ?>" alt="" loading="lazy">
+                                <?php else: ?>
+                                    <div class="course-row__image course-row__image--placeholder" aria-hidden="true">EDUSCOPE</div>
+                                <?php endif; ?>
+                                <div class="course-row__content">
+                                    <h2><?= e($row['name']); ?></h2>
+                                    <div class="course-row__meta">
+                                        <?php if ($row['target'] !== ''): ?><span><?= e($row['target']); ?></span><?php endif; ?>
+                                        <?php if ($row['duration'] !== ''): ?><span><?= e($row['duration']); ?></span><?php endif; ?>
+                                        <?php if ($row['schedule'] !== ''): ?><span><?= e($row['schedule']); ?></span><?php endif; ?>
+                                        <?php if ($row['target'] === '' && $row['duration'] === '' && $row['schedule'] === ''): ?><span>Belum ada keterangan tambahan</span><?php endif; ?>
+                                    </div>
+                                    <div class="course-row__price"><?= (int) $row['price'] === 0 ? 'Biaya belum dicantumkan' : 'Rp ' . number_format($row['price'], 0, ',', '.'); ?></div>
+                                </div>
+                                <div class="course-row__actions">
+                                    <a class="button button--quiet button--small" href="<?= e(app_url('edit.php?id=' . (int) $row['id'])); ?>">Edit</a>
+                                    <form action="<?= e(app_url('delete.php')); ?>" method="post" onsubmit="return confirm('Hapus kelas ini? Tindakan ini tidak bisa dibatalkan.')">
+                                        <input type="hidden" name="id" value="<?= (int) $row['id']; ?>">
+                                        <input type="hidden" name="csrf_token" value="<?= e($csrfToken); ?>">
+                                        <button class="button button--danger button--small" type="submit" aria-label="Hapus kelas <?= e($row['name']); ?>">Hapus</button>
+                                    </form>
+                                </div>
+                            </article>
+                        <?php endwhile; ?>
+                        <div class="empty-state" id="noSearchResults" hidden><strong>Kelas tidak ditemukan.</strong>Coba kata pencarian lain.</div>
+                    </div>
+                <?php endif; ?>
+            </section>
+        </div>
+    </main>
+    <script src="<?= e(app_url('courses.js')); ?>" defer></script>
 </body>
-
 </html>
