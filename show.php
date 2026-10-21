@@ -6,7 +6,7 @@ require_once __DIR__ . '/config/db.php';
 $queryError = false;
 try {
     $courses = $db_connect->query(
-        'SELECT id, name, target, duration, `schedule`, price, image FROM courses ORDER BY id DESC'
+        'SELECT id, name, target, duration, `schedule`, price, image, is_active FROM courses ORDER BY id DESC'
     );
     $courseCount = $courses->num_rows;
 } catch (mysqli_sql_exception $exception) {
@@ -18,6 +18,7 @@ try {
 $csrfToken = csrf_token();
 $catalogFlash = consume_flash_message('catalog');
 $activePage = 'courses';
+$showHomeBrand = true;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -26,10 +27,12 @@ $activePage = 'courses';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Daftar Kelas | EDUSCOPE</title>
     <link rel="stylesheet" href="<?= e(app_url('style.css')); ?>">
+    <link rel="stylesheet" href="<?= e(app_url('home.css')); ?>">
 </head>
-<body>
+<body class="home-page admin-page">
+    <a class="home-skip-link" href="#admin-content">Lewati ke daftar kelas</a>
     <?php include __DIR__ . '/partials/site-nav.php'; ?>
-    <main class="admin-main">
+    <main class="admin-main" id="admin-content" tabindex="-1">
         <div class="container">
             <header class="page-intro">
                 <div>
@@ -60,7 +63,7 @@ $activePage = 'courses';
                         <?php while ($row = $courses->fetch_assoc()): ?>
                             <article class="course-row" data-course-name="<?= e($row['name']); ?>">
                                 <?php if (trim($row['image']) !== ''): ?>
-                                    <img class="course-row__image" src="<?= safe_href($row['image']); ?>" alt="" loading="lazy">
+                                    <img class="course-row__image" src="<?= safe_href($row['image']); ?>" alt="" loading="lazy" decoding="async">
                                 <?php else: ?>
                                     <div class="course-row__image course-row__image--placeholder" aria-hidden="true">EDUSCOPE</div>
                                 <?php endif; ?>
@@ -73,6 +76,9 @@ $activePage = 'courses';
                                         <?php if ($row['target'] === '' && $row['duration'] === '' && $row['schedule'] === ''): ?><span>Belum ada keterangan tambahan</span><?php endif; ?>
                                     </div>
                                     <div class="course-row__price"><?= (int) $row['price'] === 0 ? 'Biaya belum dicantumkan' : 'Rp ' . number_format($row['price'], 0, ',', '.'); ?></div>
+                                    <span class="course-status <?= (int) $row['is_active'] === 1 ? 'course-status--active' : 'course-status--inactive'; ?>">
+                                        <?= (int) $row['is_active'] === 1 ? 'Tampil di beranda' : 'Disembunyikan'; ?>
+                                    </span>
                                 </div>
                                 <div class="course-row__actions">
                                     <a class="button button--quiet button--small" href="<?= e(app_url('edit.php?id=' . (int) $row['id'])); ?>">Edit</a>

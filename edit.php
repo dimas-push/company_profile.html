@@ -10,11 +10,11 @@ if (!$id || $id < 1) {
 }
 
 $statement = $db_connect->prepare(
-    'SELECT id, name, description, target, duration, `schedule`, price, image FROM courses WHERE id = ? LIMIT 1'
+    'SELECT id, name, description, target, duration, `schedule`, price, image, is_active FROM courses WHERE id = ? LIMIT 1'
 );
 $statement->bind_param('i', $id);
 $statement->execute();
-$statement->bind_result($courseId, $courseName, $courseDescription, $courseTarget, $courseDuration, $courseSchedule, $coursePrice, $courseImage);
+$statement->bind_result($courseId, $courseName, $courseDescription, $courseTarget, $courseDuration, $courseSchedule, $coursePrice, $courseImage, $courseIsActive);
 $courseFound = $statement->fetch();
 $row = $courseFound
     ? array(
@@ -26,6 +26,7 @@ $row = $courseFound
         'schedule' => $courseSchedule,
         'price' => $coursePrice,
         'image' => $courseImage,
+        'is_active' => (int) $courseIsActive,
     )
     : null;
 $statement->close();
@@ -41,12 +42,13 @@ if (
 ) {
     $formError = 'Halaman ini sudah lama terbuka. Muat ulang sebelum menyimpan perubahan.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim(isset($_POST['name']) ? $_POST['name'] : '');
-    $description = trim(isset($_POST['description']) ? $_POST['description'] : '');
-    $target = trim(isset($_POST['target']) ? $_POST['target'] : '');
-    $duration = trim(isset($_POST['duration']) ? $_POST['duration'] : '');
-    $schedule = trim(isset($_POST['schedule']) ? $_POST['schedule'] : '');
+    $name = trim(post_string('name'));
+    $description = trim(post_string('description'));
+    $target = trim(post_string('target'));
+    $duration = trim(post_string('duration'));
+    $schedule = trim(post_string('schedule'));
     $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_INT);
+    $isActive = post_string('is_active') === '1' ? 1 : 0;
 
     if (
         $name === '' || strlen($name) > 255 || $description === '' || strlen($description) > 5000 ||
@@ -59,7 +61,8 @@ if (
         $row['target'] = $target;
         $row['duration'] = $duration;
         $row['schedule'] = $schedule;
-        $row['price'] = isset($_POST['price']) ? $_POST['price'] : $row['price'];
+        $row['price'] = post_string('price', (string) $row['price']);
+        $row['is_active'] = $isActive;
     } else {
         $uploadError = '';
         $newImagePath = store_image_upload(isset($_FILES['image']) ? $_FILES['image'] : null, $uploadError, false);
@@ -72,15 +75,19 @@ if (
             $row['duration'] = $duration;
             $row['schedule'] = $schedule;
             $row['price'] = $price;
+            $row['is_active'] = $isActive;
         } else {
             $image = $newImagePath === null ? $row['image'] : $newImagePath;
             try {
                 $statement = $db_connect->prepare(
-                    'UPDATE courses SET name = ?, description = ?, target = ?, duration = ?, `schedule` = ?, price = ?, image = ? WHERE id = ?'
+                    'UPDATE courses SET name = ?, description = ?, target = ?, duration = ?, `schedule` = ?, price = ?, image = ?, is_active = ? WHERE id = ?'
                 );
-                $statement->bind_param('sssssisi', $name, $description, $target, $duration, $schedule, $price, $image, $id);
+                $statement->bind_param('sssssisii', $name, $description, $target, $duration, $schedule, $price, $image, $isActive, $id);
                 $statement->execute();
                 $statement->close();
+                if ($newImagePath !== null && $newImagePath !== $row['image']) {
+                    delete_course_image($row['image']);
+                }
                 redirect_with_flash('show.php', 'catalog', 'Perubahan kelas sudah disimpan.', 'success');
             } catch (Throwable $exception) {
                 if ($newImagePath !== null) {
@@ -97,12 +104,13 @@ if (
                 $row['duration'] = $duration;
                 $row['schedule'] = $schedule;
                 $row['price'] = $price;
+                $row['is_active'] = $isActive;
             }
-            $row['image'] = $image;
         }
     }
 }
 $activePage = 'courses';
+$showHomeBrand = true;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -111,10 +119,12 @@ $activePage = 'courses';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ubah Kelas | EDUSCOPE</title>
     <link rel="stylesheet" href="<?= e(app_url('style.css')); ?>">
+    <link rel="stylesheet" href="<?= e(app_url('home.css')); ?>">
 </head>
-<body>
+<body class="home-page admin-page">
+    <a class="home-skip-link" href="#admin-content">Lewati ke formulir kelas</a>
     <?php include __DIR__ . '/partials/site-nav.php'; ?>
-    <main class="admin-main">
+    <main class="admin-main" id="admin-content" tabindex="-1">
         <div class="container">
             <header class="page-intro">
                 <div>
@@ -160,13 +170,19 @@ $activePage = 'courses';
                                 <p class="field-hint">Isi 0 jika biayanya perlu ditanyakan terlebih dahulu.</p>
                             </div>
                         </div>
+                        <div class="field field--status">
+                            <label class="checkbox-field" for="is_active">
+                                <input type="checkbox" id="is_active" name="is_active" value="1" <?= !empty($row['is_active']) ? 'checked' : ''; ?>>
+                                <span>Tampilkan kelas ini di halaman utama</span>
+                            </label>
+                        </div>
                         <div class="field">
                             <label for="image">Ganti foto <span class="optional">(opsional)</span></label>
                             <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/webp">
                             <p class="field-hint">Pilih gambar JPG, PNG, GIF, atau WebP (maksimal 5 MB).</p>
                             <div class="current-image">
                                 <?php if (trim($row['image']) !== ''): ?>
-                                    <img src="<?= safe_href($row['image']); ?>" alt="Foto kelas saat ini">
+                                    <img src="<?= safe_href($row['image']); ?>" alt="Foto kelas saat ini" decoding="async">
                                     <span>Foto saat ini: <?= e(basename($row['image'])); ?></span>
                                 <?php else: ?>
                                     <span>Belum ada foto untuk kelas ini.</span>

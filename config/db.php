@@ -1,9 +1,27 @@
 <?php
 
-$databaseHost = getenv('EDUSCOPE_DB_HOST') ?: 'localhost';
-$databaseUser = getenv('EDUSCOPE_DB_USER') ?: 'root';
-$databasePassword = getenv('EDUSCOPE_DB_PASSWORD') ?: '';
-$databaseName = getenv('EDUSCOPE_DB_NAME') ?: 'pemweb-db';
+require_once __DIR__ . '/environment.php';
+
+$databaseHostSetting = getenv('EDUSCOPE_DB_HOST');
+$databaseUserSetting = getenv('EDUSCOPE_DB_USER');
+$databasePasswordSetting = getenv('EDUSCOPE_DB_PASSWORD');
+$databaseNameSetting = getenv('EDUSCOPE_DB_NAME');
+$databaseHost = $databaseHostSetting ?: 'localhost';
+$databaseUser = $databaseUserSetting ?: (is_production_environment() ? '' : 'root');
+$databasePassword = $databasePasswordSetting ?: '';
+$databaseName = $databaseNameSetting ?: 'pemweb-db';
+
+if (
+    is_production_environment() &&
+    (
+        !$databaseHostSetting || !$databaseUserSetting || !$databasePasswordSetting || !$databaseNameSetting ||
+        $databaseUser === 'root' || trim($databasePassword) === ''
+    )
+) {
+    error_log('Production database credentials are missing or unsafe.');
+    http_response_code(500);
+    exit('Konfigurasi database belum tersedia. Hubungi pengelola situs.');
+}
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 

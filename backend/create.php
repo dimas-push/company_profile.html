@@ -12,11 +12,11 @@ if (!verify_csrf_token(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : null
     redirect_with_flash('create.php', 'program_form', 'Halaman ini sudah lama terbuka. Muat ulang sebelum menyimpan kelas.');
 }
 
-$name = trim(isset($_POST['name']) ? $_POST['name'] : '');
-$description = trim(isset($_POST['description']) ? $_POST['description'] : '');
-$target = trim(isset($_POST['target']) ? $_POST['target'] : '');
-$duration = trim(isset($_POST['duration']) ? $_POST['duration'] : '');
-$schedule = trim(isset($_POST['schedule']) ? $_POST['schedule'] : '');
+$name = trim(post_string('name'));
+$description = trim(post_string('description'));
+$target = trim(post_string('target'));
+$duration = trim(post_string('duration'));
+$schedule = trim(post_string('schedule'));
 $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_INT);
 $image = isset($_FILES['image']) ? $_FILES['image'] : null;
 

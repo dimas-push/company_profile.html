@@ -5,10 +5,17 @@ $csrfToken = isset($csrfToken) ? $csrfToken : csrf_token();
 ?>
 <header class="admin-topbar">
     <div class="container admin-topbar__inner">
-        <a class="brand" href="<?= e(app_url('index.php')); ?>" aria-label="EDUSCOPE beranda">
-            <span class="brand__mark" aria-hidden="true">E</span>
-            <span>EDUSCOPE<small>Bimbel dan kursus</small></span>
-        </a>
+        <?php if (!empty($showHomeBrand)): ?>
+            <a class="home-brand" href="<?= e(app_url('index.php')); ?>" aria-label="EDUSCOPE Learning Centre, beranda">
+                <span class="home-brand__word">EDU<span>SCOPE</span></span>
+                <small>LEARNING CENTRE &middot; SUKABUMI</small>
+            </a>
+        <?php else: ?>
+            <a class="brand" href="<?= e(app_url('index.php')); ?>" aria-label="EDUSCOPE beranda">
+                <span class="brand__mark" aria-hidden="true">E</span>
+                <span>EDUSCOPE<small>Bimbel dan kursus</small></span>
+            </a>
+        <?php endif; ?>
         <nav class="admin-nav" aria-label="Menu pengelola">
             <?php if ($isAdmin): ?>
                 <a class="<?= $activePage === 'courses' ? 'is-active' : ''; ?>" href="<?= e(app_url('show.php')); ?>">Kelas</a>

@@ -4,6 +4,7 @@ require_admin();
 $csrfToken = csrf_token();
 $programFormFlash = consume_flash_message('program_form');
 $activePage = 'create';
+$showHomeBrand = true;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -12,10 +13,12 @@ $activePage = 'create';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tambah Kelas | EDUSCOPE</title>
     <link rel="stylesheet" href="<?= e(app_url('style.css')); ?>">
+    <link rel="stylesheet" href="<?= e(app_url('home.css')); ?>">
 </head>
-<body>
+<body class="home-page admin-page">
+    <a class="home-skip-link" href="#admin-content">Lewati ke formulir kelas</a>
     <?php include __DIR__ . '/partials/site-nav.php'; ?>
-    <main class="admin-main">
+    <main class="admin-main" id="admin-content" tabindex="-1">
         <div class="container">
             <header class="page-intro">
                 <div>

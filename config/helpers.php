@@ -1,8 +1,15 @@
 <?php
 
+require_once __DIR__ . '/environment.php';
+
 function e($value)
 {
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function post_string($key, $default = '')
+{
+    return isset($_POST[$key]) && is_string($_POST[$key]) ? $_POST[$key] : $default;
 }
 
 function safe_href($value)
@@ -58,11 +65,153 @@ function require_login()
 function require_admin()
 {
     require_login();
+    global $db_connect;
 
-    if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    require_once __DIR__ . '/db.php';
+
+    $userId = (int) $_SESSION['user_id'];
+    try {
+        $statement = $db_connect->prepare('SELECT role FROM users WHERE id = ? LIMIT 1');
+        $statement->bind_param('i', $userId);
+        $statement->execute();
+        $statement->bind_result($currentRole);
+        $userFound = $statement->fetch();
+        $statement->close();
+    } catch (Throwable $exception) {
+        error_log('Admin authorization check failed: ' . $exception->getMessage());
+        http_response_code(503);
+        exit('Pemeriksaan akses admin sedang bermasalah. Coba lagi nanti.');
+    }
+
+    if (!$userFound) {
+        $_SESSION = array();
+        session_regenerate_id(true);
+        redirect_to(app_url('login.php'));
+    }
+
+    $_SESSION['user_role'] = $currentRole;
+
+    if ($currentRole !== 'admin') {
         http_response_code(403);
         exit('Halaman ini hanya bisa dibuka oleh pengelola. <a href="' . e(app_url('profile.php')) . '">Kembali ke akun</a>');
     }
+}
+
+function consume_rate_limit($scope, $limit, $windowSeconds)
+{
+    $scope = preg_replace('/[^a-z0-9_-]/i', '', (string) $scope);
+    $remoteAddress = isset($_SERVER['REMOTE_ADDR']) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
+    if (filter_var($remoteAddress, FILTER_VALIDATE_IP) === false) {
+        $remoteAddress = 'unknown';
+    }
+
+    $directory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'rate-limits';
+    if (!is_dir($directory) && !@mkdir($directory, 0700, true) && !is_dir($directory)) {
+        error_log('Rate limit storage directory is unavailable.');
+        return false;
+    }
+
+    $filePath = $directory . DIRECTORY_SEPARATOR . $scope . '-' . hash('sha256', $remoteAddress) . '.json';
+    $file = @fopen($filePath, 'c+');
+    if ($file === false || !flock($file, LOCK_EX)) {
+        if (is_resource($file)) {
+            fclose($file);
+        }
+        error_log('Rate limit storage could not be locked.');
+        return false;
+    }
+    @chmod($filePath, 0600);
+
+    rewind($file);
+    $storedAttempts = stream_get_contents($file);
+    $attempts = json_decode($storedAttempts, true);
+    if (!is_array($attempts)) {
+        $attempts = array();
+    }
+
+    $now = time();
+    $cutoff = $now - (int) $windowSeconds;
+    $attempts = array_values(array_filter($attempts, function ($timestamp) use ($cutoff, $now) {
+        return is_numeric($timestamp) && (int) $timestamp >= $cutoff && (int) $timestamp <= $now;
+    }));
+
+    if (count($attempts) >= (int) $limit) {
+        flock($file, LOCK_UN);
+        fclose($file);
+        return false;
+    }
+
+    $attempts[] = $now;
+    $encodedAttempts = json_encode($attempts);
+    rewind($file);
+    $saved = false;
+    if ($encodedAttempts !== false && ftruncate($file, 0)) {
+        $writtenBytes = fwrite($file, $encodedAttempts);
+        $saved = $writtenBytes === strlen($encodedAttempts) && fflush($file);
+    }
+    flock($file, LOCK_UN);
+    fclose($file);
+
+    if (!$saved) {
+        error_log('Rate limit data could not be saved.');
+        return false;
+    }
+
+    cleanup_rate_limit_files($directory, $now);
+    return true;
+}
+
+function cleanup_rate_limit_files($directory, $now)
+{
+    $lockPath = $directory . DIRECTORY_SEPARATOR . '.cleanup';
+    $lockFile = @fopen($lockPath, 'c+');
+    if ($lockFile === false || !flock($lockFile, LOCK_EX | LOCK_NB)) {
+        if (is_resource($lockFile)) {
+            fclose($lockFile);
+        }
+        return;
+    }
+
+    rewind($lockFile);
+    $lastCleanup = (int) trim((string) stream_get_contents($lockFile));
+    if ($now - $lastCleanup >= 86400) {
+        $rateLimitFiles = glob($directory . DIRECTORY_SEPARATOR . '*.json');
+        if (is_array($rateLimitFiles)) {
+            foreach ($rateLimitFiles as $filePath) {
+                if (is_file($filePath) && filemtime($filePath) < $now - 86400) {
+                    @unlink($filePath);
+                }
+            }
+        }
+
+        rewind($lockFile);
+        ftruncate($lockFile, 0);
+        fwrite($lockFile, (string) $now);
+        fflush($lockFile);
+    }
+
+    flock($lockFile, LOCK_UN);
+    fclose($lockFile);
+}
+
+function delete_course_image($relativePath)
+{
+    if (!is_string($relativePath) || !preg_match('/^uploads\/[a-f0-9]{32}\.(jpg|png|gif|webp)$/i', $relativePath)) {
+        return false;
+    }
+
+    $uploadDirectory = realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'uploads');
+    $imagePath = realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath));
+    if ($uploadDirectory === false || $imagePath === false || !is_file($imagePath)) {
+        return false;
+    }
+
+    $uploadPrefix = rtrim($uploadDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    if (stripos($imagePath, $uploadPrefix) !== 0) {
+        return false;
+    }
+
+    return @unlink($imagePath);
 }
 
 function set_flash_message($key, $message, $type = 'danger')
@@ -131,7 +280,7 @@ function start_app_session()
     session_save_path($sessionDirectory);
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');
-    $isSecureRequest = !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+    $isSecureRequest = is_production_environment() || (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off');
     session_set_cookie_params(array(
         'lifetime' => 0,
         'path' => '/',
@@ -186,7 +335,17 @@ function store_image_upload($file, &$error, $required = true)
         return null;
     }
 
-    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 5 * 1024 * 1024) {
+    if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+        $error = 'Foto melewati batas upload server. Coba gambar yang lebih kecil.';
+        return false;
+    }
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $error = 'Foto belum berhasil diunggah. Coba pilih file lain.';
+        return false;
+    }
+
+    if ($file['size'] > 5 * 1024 * 1024) {
         $error = 'Ukuran foto tidak boleh lebih dari 5 MB.';
         return false;
     }
@@ -202,6 +361,17 @@ function store_image_upload($file, &$error, $required = true)
 
     if (!isset($allowedTypes[$mimeType])) {
         $error = 'Gunakan foto berformat JPG, PNG, GIF, atau WebP.';
+        return false;
+    }
+
+    $imageDimensions = @getimagesize($file['tmp_name']);
+    if (
+        $imageDimensions === false ||
+        $imageDimensions[0] > 6000 ||
+        $imageDimensions[1] > 6000 ||
+        ($imageDimensions[0] * $imageDimensions[1]) > 20000000
+    ) {
+        $error = 'Pilih foto berukuran maksimal 6000 × 6000 piksel.';
         return false;
     }
 

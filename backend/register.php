@@ -12,10 +12,14 @@ if (!verify_csrf_token(isset($_POST['csrf_token']) ? $_POST['csrf_token'] : null
     redirect_with_flash('register.php', 'registration', 'Halaman pendaftaran sudah lama terbuka. Muat ulang, lalu coba lagi.');
 }
 
-$name = trim(isset($_POST['name']) ? $_POST['name'] : '');
-$email = trim(isset($_POST['email']) ? $_POST['email'] : '');
-$password = isset($_POST['password']) ? $_POST['password'] : '';
-$confirmation = isset($_POST['confirm']) ? $_POST['confirm'] : '';
+if (!consume_rate_limit('register', 20, 3600)) {
+    redirect_with_flash('register.php', 'registration', 'Terlalu banyak pendaftaran dari jaringan ini. Coba lagi nanti.');
+}
+
+$name = trim(post_string('name'));
+$email = trim(post_string('email'));
+$password = post_string('password');
+$confirmation = post_string('confirm');
 
 if ($name === '' || strlen($name) > 255 || strlen($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     redirect_with_flash('register.php', 'registration', 'Periksa nama dan alamat email Anda.');

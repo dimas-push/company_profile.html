@@ -20,9 +20,13 @@ if (!empty($_POST['website'])) {
     return_to_contact_form('sent');
 }
 
-$name = trim(isset($_POST['name']) ? $_POST['name'] : '');
-$email = trim(isset($_POST['email']) ? $_POST['email'] : '');
-$message = trim(isset($_POST['message']) ? $_POST['message'] : '');
+if (!consume_rate_limit('contact', 12, 600)) {
+    return_to_contact_form('error');
+}
+
+$name = trim(post_string('name'));
+$email = trim(post_string('email'));
+$message = trim(post_string('message'));
 
 if (
     $name === '' || strlen($name) > 120 ||

@@ -82,162 +82,145 @@ $featuredCourses = array(
     ),
 );
 
-$showFeaturedCourses = $programQueryError || count($courses) === 0;
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Cari bimbingan belajar atau kursus di EDUSCOPE. Lihat pilihan kelas dan tanyakan jadwal serta biayanya.">
-    <title>EDUSCOPE | Bimbel dan Kursus</title>
+    <meta name="description" content="Temukan bimbel dan kursus EDUSCOPE untuk anak, pelajar, dan peserta umum. Belajar lebih seru dengan program yang sesuai tujuanmu.">
+    <meta name="theme-color" content="#5633bf">
+    <title>EDUSCOPE | Belajar Ceria, Tumbuh Percaya Diri</title>
+    <link rel="preload" as="image" href="<?= e(app_url('img/eduscope-hero.png')); ?>">
     <link rel="stylesheet" href="<?= e(app_url('style.css')); ?>">
+    <link rel="stylesheet" href="<?= e(app_url('home.css')); ?>">
 </head>
-<body>
-    <header class="site-header">
-        <nav class="site-nav container" aria-label="Navigasi utama">
-            <a class="brand" href="#home" aria-label="EDUSCOPE beranda">
-                <span class="brand__mark" aria-hidden="true">E</span>
-                <span>EDUSCOPE<small>Bimbel dan kursus</small></span>
+<body class="home-page">
+    <a class="home-skip-link" href="#main-content">Lewati ke konten utama</a>
+
+    <div class="home-topbar">
+        <div class="home-container home-topbar__inner">
+            <p><span aria-hidden="true">✦</span> Belajar hari ini, melangkah lebih percaya diri</p>
+            <a href="#kontak"><span aria-hidden="true">✉</span> Yuk, temukan kelas yang pas</a>
+        </div>
+    </div>
+
+    <header class="home-header">
+        <nav class="home-container home-nav" aria-label="Navigasi utama">
+            <a class="home-brand" href="#home" aria-label="EDUSCOPE Learning Centre, beranda">
+                <span class="home-brand__word">EDU<span>SCOPE</span></span>
+                <small>LEARNING CENTRE · SUKABUMI</small>
             </a>
-            <div class="site-nav__links">
+
+            <button class="home-menu-toggle" type="button" aria-controls="home-nav-links" aria-expanded="false" aria-label="Buka menu">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="home-nav__links" id="home-nav-links">
+                <a class="is-active" href="#home">Beranda</a>
+                <a href="#program">Program</a>
                 <a href="#tentang">Tentang</a>
-                <a href="#program">Kelas</a>
+                <a href="#kenapa">Keunggulan</a>
                 <a href="#kontak">Kontak</a>
-                <a class="button button--small" href="<?= e(app_url('login.php')); ?>">Masuk</a>
+                <a class="home-nav__login" href="<?= e(app_url('login.php')); ?>">Masuk</a>
+                <a class="home-button home-button--nav" href="#kontak">Konsultasi <span aria-hidden="true">→</span></a>
             </div>
         </nav>
     </header>
 
-    <main>
-        <section class="hero" id="home">
-            <div class="hero__inner container">
-                <div>
-                    <p class="eyebrow">Bimbingan belajar dan kursus</p>
-                    <h1>Cari kelas yang cocok untuk Anda.</h1>
-                    <p class="hero__copy">Butuh bantuan pelajaran sekolah atau ingin belajar keterampilan baru? Lihat kelas yang tersedia, lalu tanyakan jadwal dan biayanya kepada kami.</p>
-                    <div class="hero__actions">
-                        <a class="button" href="#program">Lihat kelas <span aria-hidden="true">↗</span></a>
-                        <a class="button button--quiet" href="#kontak">Tanya dulu</a>
+    <main id="main-content">
+        <section class="home-hero" id="home">
+            <div class="home-hero__decor home-hero__decor--cloud" aria-hidden="true">☁</div>
+            <div class="home-hero__decor home-hero__decor--sun" aria-hidden="true">☼</div>
+            <div class="home-hero__decor home-hero__decor--star" aria-hidden="true">✦</div>
+            <div class="home-container home-hero__inner">
+                <div class="home-hero__copy">
+                    <p class="home-kicker"><span aria-hidden="true"></span> Bimbel dan kursus untuk semua langkah</p>
+                    <h1>Belajar dengan ceria,<br><span>tumbuh penuh percaya diri.</span></h1>
+                    <p class="home-hero__description">Dari pelajaran sekolah sampai keterampilan baru, temukan ruang belajar yang membuat setiap langkah terasa lebih menyenangkan.</p>
+                    <div class="home-hero__actions">
+                        <a class="home-button" href="#program">Jelajahi program <span class="home-button__arrow" aria-hidden="true">→</span></a>
+                        <a class="home-text-link" href="#tentang">Kenali EDUSCOPE <span aria-hidden="true">↗</span></a>
                     </div>
-                    <div class="hero__note"><span class="hero__note-mark" aria-hidden="true">✓</span> Masih ragu memilih? Tanyakan dulu kepada kami.</div>
-                </div>
-                <div class="hero-art" aria-label="Pilihan bimbingan belajar dan kursus EDUSCOPE">
-                    <div class="hero-art__sheet">
-                        <div class="hero-art__label">Pilihan kelas EDUSCOPE</div>
-                        <div class="hero-art__title">Pelajaran sekolah atau keterampilan baru.</div>
-                        <div class="hero-art__footer"><span>Tanya jadwal dan biaya</span><span class="hero-art__spark" aria-hidden="true">✳</span></div>
-                    </div>
-                    <div class="floating-note"><span aria-hidden="true">↗</span> Tanyakan dulu sebelum memilih</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section about-section" id="tentang">
-            <div class="container">
-                <div class="about-intro">
-                    <div class="about-intro__copy">
-                        <p class="eyebrow">Kenalan dengan EDUSCOPE</p>
-                        <h2>Belajar hal baru, selangkah demi selangkah.</h2>
-                        <p>EDUSCOPE Learning Centre berdiri di Sukabumi pada 2014, awalnya dengan nama Bonita Institute. Kini, programnya mencakup bimbingan mata pelajaran dan berbagai kursus, dari Calistung hingga persiapan TOEFL.</p>
-                        <a class="about-source" href="https://eduscopelc.my.canva.site/" target="_blank" rel="noopener noreferrer">Kenali EDUSCOPE lebih jauh <span aria-hidden="true">&nearr;</span></a>
-                    </div>
-                    <aside class="about-highlight" aria-label="Sekilas tentang EDUSCOPE">
-                        <span class="about-highlight__spark" aria-hidden="true">&#10022;</span>
-                        <p class="about-highlight__label">Berawal di Sukabumi</p>
-                        <strong>Sejak 2014</strong>
-                        <p class="about-highlight__copy">Ragam kelas untuk anak, pelajar, dan peserta dewasa.</p>
-                        <div class="about-highlight__tags" aria-label="Jenis pembelajaran">
-                            <span>Bimbel</span>
-                            <span>Kursus</span>
-                            <span>Berbagai usia</span>
+                    <div class="home-hero__trust">
+                        <div class="home-trust-item">
+                            <span class="home-trust-item__icon home-trust-item__icon--pink" aria-hidden="true">♡</span>
+                            <span><strong>Ramah dan suportif</strong><small>Nyaman untuk bertanya</small></span>
                         </div>
-                    </aside>
-                </div>
-                <div class="about-programs-intro">
-                    <div>
-                        <p class="eyebrow">Pilihan pembelajaran</p>
-                        <h3>Ada banyak cara untuk berkembang.</h3>
+                        <div class="home-trust-item">
+                            <span class="home-trust-item__icon home-trust-item__icon--green" aria-hidden="true">✎</span>
+                            <span><strong>Banyak pilihan kelas</strong><small>Sesuai minat dan tujuan</small></span>
+                        </div>
+                        <div class="home-trust-item">
+                            <span class="home-trust-item__icon home-trust-item__icon--blue" aria-hidden="true">✦</span>
+                            <span><strong>Menemani sejak 2014</strong><small>Berawal di Sukabumi</small></span>
+                        </div>
                     </div>
-                    <p>Pilih bidang yang sesuai dengan kebutuhan dan tujuan belajar.</p>
                 </div>
-                <div class="about-grid">
-                    <article class="feature-card">
-                        <span class="feature-card__mark" aria-hidden="true">Aa</span>
-                        <h3>Bahasa Inggris &amp; Jepang</h3>
-                        <p>Belajar Bahasa Inggris untuk berbagai usia, atau Bahasa Jepang dari Katakana hingga persiapan JLPT N4.</p>
-                    </article>
-                    <article class="feature-card">
-                        <span class="feature-card__mark" aria-hidden="true">123</span>
-                        <h3>Bimbel &amp; Calistung</h3>
-                        <p>Pendampingan Matematika dan IPA serta kelas membaca, menulis, dan berhitung untuk anak mulai pra-TK.</p>
-                    </article>
-                    <article class="feature-card">
-                        <span class="feature-card__mark" aria-hidden="true">Go!</span>
-                        <h3>Program lainnya</h3>
-                        <p>Pilih Jarimatika, persiapan TOEFL, atau pelatihan Bahasa Inggris untuk kebutuhan perusahaan.</p>
-                    </article>
+
+                <div class="home-hero__visual">
+                    <div class="home-hero__image-shape" aria-hidden="true"></div>
+                    <img class="home-hero__image" src="<?= e(app_url('img/eduscope-hero.png')); ?>" alt="Ilustrasi suasana belajar dengan anak, pelajar remaja, dan tutor" width="1664" height="1024" fetchpriority="high" decoding="async">
+                    <div class="home-hero__badge">
+                        <span class="home-hero__badge-icon" aria-hidden="true">✦</span>
+                        <span><strong>Ruang untuk berkembang</strong><small>Belajar sesuai langkahmu</small></span>
+                    </div>
+                    <span class="home-hero__doodle home-hero__doodle--one" aria-hidden="true">✳</span>
+                    <span class="home-hero__doodle home-hero__doodle--two" aria-hidden="true">⌁</span>
                 </div>
             </div>
+            <div class="home-hero__wave" aria-hidden="true"></div>
         </section>
 
-        <section class="section program-section" id="program">
-            <div class="container">
-                <div class="section-heading">
-                    <p class="eyebrow">Kelas yang tersedia</p>
-                    <h2>Lihat pilihan bimbel dan kursus.</h2>
-                    <p>Rincian kelas di bawah dirangkum dari profil EDUSCOPE. Tanyakan jadwal dan biaya lewat formulir.</p>
+        <section class="home-section home-programs" id="program">
+            <div class="home-container">
+                <div class="home-section__heading">
+                    <p class="home-kicker home-kicker--center"><span aria-hidden="true"></span> Kelas EDUSCOPE <span aria-hidden="true"></span></p>
+                    <h2>Program untuk setiap rasa ingin tahu</h2>
+                    <p>Lihat pilihan bimbel dan kursus. Jadwal dan biaya bisa ditanyakan langsung kepada tim kami.</p>
                 </div>
-                <?php if ($showFeaturedCourses): ?>
-                    <div class="flash flash--info program-notice" role="status">Menampilkan informasi kelas EDUSCOPE. Jadwal dan biaya belum dicantumkan; silakan tanyakan melalui formulir.</div>
-                    <div class="program-grid">
-                        <?php foreach ($featuredCourses as $course): ?>
-                            <article class="program-card">
-                                <div class="program-card__art program-card__art--<?= e($course['style']); ?>" aria-hidden="true">
-                                    <span class="program-card__art-mark"><?= e($course['mark']); ?></span>
-                                    <span class="program-card__art-label"><?= e($course['category']); ?></span>
-                                </div>
-                                <div class="program-card__body">
-                                    <h3><?= e($course['name']); ?></h3>
-                                    <p class="program-card__description"><?= e($course['description']); ?></p>
-                                    <div class="program-card__meta"><span><b>Untuk</b> <?= e($course['target']); ?></span></div>
-                                    <p class="program-card__price"><a href="#kontak">Tanyakan jadwal dan biaya <span aria-hidden="true">&rarr;</span></a></p>
-                                </div>
-                            </article>
-                        <?php endforeach; ?>
-                    </div>
+
+                <?php if ($programQueryError): ?>
+                    <div class="home-program-note" role="alert">Daftar kelas belum bisa dimuat. Silakan coba lagi nanti atau hubungi tim EDUSCOPE.</div>
+                <?php elseif (count($courses) === 0): ?>
+                    <div class="home-program-note" role="status">Belum ada kelas yang dipublikasikan. Hubungi tim EDUSCOPE untuk menanyakan program belajar.</div>
                 <?php else: ?>
-                    <div class="program-grid">
+                    <div class="home-program-grid">
                         <?php foreach ($courses as $course): ?>
-                            <article class="program-card">
-                                <?php
-                                $courseArtwork = array('style' => 'english', 'mark' => 'EDU', 'category' => 'Kelas');
-                                foreach ($featuredCourses as $featuredCourse) {
-                                    if ($featuredCourse['name'] === $course['name']) {
-                                        $courseArtwork = $featuredCourse;
-                                        break;
-                                    }
+                            <?php
+                            $courseArtwork = array('style' => 'school', 'mark' => 'EDU', 'category' => 'Program EDUSCOPE');
+                            foreach ($featuredCourses as $featuredCourse) {
+                                if ($featuredCourse['name'] === $course['name']) {
+                                    $courseArtwork = $featuredCourse;
+                                    break;
                                 }
-                                ?>
+                            }
+                            ?>
+                            <article class="home-course-card home-course-card--<?= e($courseArtwork['style']); ?>">
                                 <?php if (trim($course['image']) !== ''): ?>
-                                    <img class="program-card__image" src="<?= safe_href($course['image']); ?>" alt="Foto kelas <?= e($course['name']); ?>" loading="lazy">
+                                    <img class="home-course-card__photo" src="<?= safe_href($course['image']); ?>" alt="Foto kelas <?= e($course['name']); ?>" loading="lazy" decoding="async">
                                 <?php else: ?>
-                                    <div class="program-card__art program-card__art--<?= e($courseArtwork['style']); ?>" aria-hidden="true">
-                                        <span class="program-card__art-mark"><?= e($courseArtwork['mark']); ?></span>
-                                        <span class="program-card__art-label"><?= e($courseArtwork['category']); ?></span>
+                                    <div class="home-course-card__visual" aria-hidden="true">
+                                        <span class="home-course-card__mark"><?= e($courseArtwork['mark']); ?></span>
+                                        <span class="home-course-card__category"><?= e($courseArtwork['category']); ?></span>
+                                        <span class="home-course-card__spark">✦</span>
                                     </div>
                                 <?php endif; ?>
-                                <div class="program-card__body">
+                                <div class="home-course-card__body">
                                     <h3><?= e($course['name']); ?></h3>
-                                    <p class="program-card__description"><?= nl2br(e($course['description'])); ?></p>
-                                    <div class="program-card__meta">
+                                    <p><?= nl2br(e($course['description'])); ?></p>
+                                    <div class="home-course-card__meta">
                                         <?php if ($course['target'] !== ''): ?><span><b>Sasaran</b> <?= e($course['target']); ?></span><?php endif; ?>
                                         <?php if ($course['duration'] !== ''): ?><span><b>Durasi</b> <?= e($course['duration']); ?></span><?php endif; ?>
                                         <?php if ($course['schedule'] !== ''): ?><span><b>Jadwal</b> <?= e($course['schedule']); ?></span><?php endif; ?>
                                     </div>
-                                    <p class="program-card__price">
-                                        <?php if ((int) $course['price'] === 0): ?><a href="#kontak">Tanyakan jadwal dan biaya <span aria-hidden="true">&rarr;</span></a><?php else: ?><span class="program-card__amount">Rp <?= number_format($course['price'], 0, ',', '.'); ?></span><?php endif; ?>
-                                    </p>
+                                    <div class="home-course-card__price">
+                                        <?php if ((int) $course['price'] === 0): ?>
+                                            <a class="home-course-card__link" href="#kontak">Tanya jadwal &amp; biaya <span aria-hidden="true">→</span></a>
+                                        <?php else: ?>
+                                            <span>Rp <?= number_format($course['price'], 0, ',', '.'); ?></span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </article>
                         <?php endforeach; ?>
@@ -246,47 +229,108 @@ $showFeaturedCourses = $programQueryError || count($courses) === 0;
             </div>
         </section>
 
-        <section class="section contact-section" id="kontak">
-            <div class="container contact-grid">
-                <div class="contact-copy">
-                    <span class="contact-copy__mark" aria-hidden="true">?</span>
-                    <p class="eyebrow">Ada yang ingin ditanyakan?</p>
-                    <h2>Kami bantu cari kelas yang pas.</h2>
-                    <p>Tanyakan bimbel atau kursus yang sesuai dengan kebutuhan belajar Anda.</p>
-                    <ul class="contact-topics" aria-label="Topik yang bisa ditanyakan">
-                        <li><span aria-hidden="true">&#10003;</span> Pilihan kelas</li>
-                        <li><span aria-hidden="true">&#10003;</span> Jadwal belajar</li>
-                        <li><span aria-hidden="true">&#10003;</span> Durasi dan biaya</li>
+        <section class="home-about" id="tentang">
+            <div class="home-container home-about__grid">
+                <div class="home-about__visual">
+                    <div class="home-about__photo-wrap">
+                        <img src="<?= e(app_url('img/eduscope-classroom.png')); ?>" alt="Ilustrasi kelas kecil dengan tutor mendampingi anak dan remaja belajar" width="1664" height="1024" loading="lazy" decoding="async">
+                    </div>
+                    <div class="home-about__year">
+                        <span>2014</span>
+                        <small>Mulai menemani<br>perjalanan belajar</small>
+                    </div>
+                    <span class="home-about__sticker" aria-hidden="true">Belajar<br>dengan hati</span>
+                    <span class="home-about__doodle home-about__doodle--star" aria-hidden="true">✦</span>
+                    <span class="home-about__doodle home-about__doodle--flower" aria-hidden="true">✿</span>
+                </div>
+                <div class="home-about__copy">
+                    <p class="home-kicker">Tentang EDUSCOPE</p>
+                    <h2>Mengubah rasa ingin tahu menjadi langkah yang berarti.</h2>
+                    <p>EDUSCOPE Learning Centre berdiri di Sukabumi pada 2014, berawal dengan nama Bonita Institute. Kini, pilihan belajarnya mencakup bimbingan mata pelajaran dan beragam kursus.</p>
+                    <p>Dari Calistung untuk anak, pelajaran sekolah, bahasa, sampai persiapan TOEFL, setiap peserta bisa mulai dari tujuan belajarnya sendiri.</p>
+                    <div class="home-about__tags" aria-label="Bidang pembelajaran">
+                        <span>Bimbingan belajar</span>
+                        <span>Kursus bahasa</span>
+                        <span>Berbagai usia</span>
+                    </div>
+                    <a class="home-text-link home-about__link" href="https://eduscopelc.my.canva.site/" target="_blank" rel="noopener noreferrer">Kenali EDUSCOPE lebih jauh <span aria-hidden="true">↗</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="home-why" id="kenapa">
+            <div class="home-container">
+                <div class="home-section__heading">
+                    <p class="home-kicker home-kicker--center"><span aria-hidden="true"></span> Kenapa EDUSCOPE <span aria-hidden="true"></span></p>
+                    <h2>Satu tempat, banyak langkah belajar</h2>
+                    <p>Temukan program yang mendukung kebutuhan belajar di setiap tahap.</p>
+                </div>
+                <div class="home-why__grid">
+                    <article class="home-why-card home-why-card--violet">
+                        <span class="home-why-card__number">01</span>
+                        <span class="home-why-card__icon" aria-hidden="true">Aa</span>
+                        <h3>Pilihan belajar beragam</h3>
+                        <p>Bimbel sekolah, bahasa, Calistung, Jarimatika, TOEFL, sampai pelatihan untuk perusahaan.</p>
+                    </article>
+                    <article class="home-why-card home-why-card--green">
+                        <span class="home-why-card__number">02</span>
+                        <span class="home-why-card__icon" aria-hidden="true">↗</span>
+                        <h3>Untuk banyak usia</h3>
+                        <p>Program tersedia untuk anak pra-TK, siswa sekolah, peserta umum, hingga kebutuhan perusahaan.</p>
+                    </article>
+                    <article class="home-why-card home-why-card--yellow">
+                        <span class="home-why-card__number">03</span>
+                        <span class="home-why-card__icon" aria-hidden="true">✦</span>
+                        <h3>Tujuan belajar yang nyata</h3>
+                        <p>Perkuat pelajaran, mulai keterampilan bahasa, atau siapkan diri untuk kebutuhan studi dan kerja.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="home-contact" id="kontak">
+            <div class="home-container home-contact__grid">
+                <div class="home-contact__copy">
+                    <p class="home-kicker">Ada yang ingin ditanyakan?</p>
+                    <h2>Yuk, cari kelas yang terasa pas.</h2>
+                    <p>Ceritakan pelajaran atau keterampilan yang ingin dipelajari. Tim EDUSCOPE akan menerima pesanmu.</p>
+                    <ul class="home-contact__topics">
+                        <li><span aria-hidden="true">✓</span> Pilihan kelas</li>
+                        <li><span aria-hidden="true">✓</span> Jadwal belajar</li>
+                        <li><span aria-hidden="true">✓</span> Durasi dan biaya</li>
                     </ul>
-                    <div class="contact-note">
-                        <strong>Belum tahu harus mulai dari mana?</strong>
-                        <span>Ceritakan pelajaran atau keterampilan yang ingin Anda pelajari. Pesan akan masuk ke pengelola EDUSCOPE.</span>
+                    <div class="home-contact__note">
+                        <span aria-hidden="true">✦</span>
+                        <p><strong>Belum yakin mulai dari mana?</strong><br>Ceritakan kebutuhanmu, kami siap membantu mencari informasinya.</p>
                     </div>
                 </div>
-                <div class="form-card contact-form-card">
-                    <div class="contact-form-card__head">
-                        <p class="eyebrow">Hubungi EDUSCOPE</p>
-                        <h3>Ceritakan yang Anda cari</h3>
-                        <p>Isi formulir singkat ini dan tulis pertanyaan Anda.</p>
+
+                <div class="home-contact__card">
+                    <div class="home-contact__card-head">
+                        <span class="home-contact__card-icon" aria-hidden="true">✉</span>
+                        <div>
+                            <p class="home-kicker">Hubungi EDUSCOPE</p>
+                            <h3>Kirim pertanyaan</h3>
+                        </div>
                     </div>
                     <?php if ($contactStatus === 'sent'): ?>
-                        <div class="flash flash--success" role="status">Pesan Anda sudah masuk. Terima kasih sudah menghubungi EDUSCOPE.</div>
+                        <div class="flash flash--success" role="status">Pesanmu sudah masuk. Terima kasih sudah menghubungi EDUSCOPE.</div>
                     <?php elseif ($contactStatus === 'error'): ?>
                         <div class="flash flash--danger" role="alert">Pesan belum terkirim. Coba lagi beberapa saat lagi.</div>
                     <?php endif; ?>
-                    <form class="contact-form" action="<?= e(app_url('backend/contact.php')); ?>" method="post">
+                    <form class="home-contact__form" action="<?= e(app_url('backend/contact.php')); ?>" method="post">
                         <input type="hidden" name="csrf_token" value="<?= e($csrfToken); ?>">
-                        <div class="field-grid contact-form__identity">
-                            <div class="field">
-                                <label for="contact-name">Nama Anda</label>
+                        <div class="home-contact__row">
+                            <div class="home-field">
+                                <label for="contact-name">Nama</label>
                                 <input id="contact-name" type="text" name="name" autocomplete="name" maxlength="120" placeholder="Nama lengkap" required>
                             </div>
-                            <div class="field">
+                            <div class="home-field">
                                 <label for="contact-email">Email</label>
                                 <input id="contact-email" type="email" name="email" autocomplete="email" maxlength="254" placeholder="nama@email.com" required>
                             </div>
                         </div>
-                        <div class="field contact-form__message">
+                        <div class="home-field">
                             <label for="contact-message">Apa yang ingin ditanyakan?</label>
                             <textarea id="contact-message" name="message" rows="4" maxlength="5000" placeholder="Contoh: Saya ingin tahu jadwal kelas Bahasa Inggris..." required></textarea>
                         </div>
@@ -294,43 +338,84 @@ $showFeaturedCourses = $programQueryError || count($courses) === 0;
                             <label for="contact-website">Jangan isi kolom ini</label>
                             <input id="contact-website" type="text" name="website" tabindex="-1" autocomplete="off">
                         </div>
-                        <div class="contact-form__submit">
-                            <button class="button" type="submit">Kirim pertanyaan <span aria-hidden="true">&rarr;</span></button>
-                            <p class="form-text">Gunakan email aktif agar pengelola bisa menghubungi Anda.</p>
+                        <div class="home-contact__submit">
+                            <button class="home-button" type="submit">Kirim pertanyaan <span aria-hidden="true">→</span></button>
+                            <small>Gunakan email aktif agar pengelola dapat menghubungimu.</small>
                         </div>
+                        <p class="home-contact__privacy">Nama, email, dan pesan digunakan untuk menanggapi pertanyaanmu. Hindari mengirim data pribadi yang tidak diperlukan.</p>
                     </form>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="site-footer">
-        <div class="site-footer__top container">
-            <div class="site-footer__brand">
-                <a class="brand" href="#home" aria-label="EDUSCOPE beranda">
-                    <span class="brand__mark" aria-hidden="true">E</span>
-                    <span>EDUSCOPE<small>Bimbel dan kursus</small></span>
+    <footer class="home-footer">
+        <div class="home-footer__banner">
+            <div class="home-container home-footer__banner-inner">
+                <div>
+                    <p class="home-footer__eyebrow">Mulai langkah pertamamu</p>
+                    <h2>Belajar lebih seru dimulai dari sini.</h2>
+                    <p>Tanyakan program yang paling sesuai dengan tujuanmu.</p>
+                </div>
+                <a class="home-button home-button--sun" href="#kontak">Konsultasi program <span class="home-button__arrow" aria-hidden="true">→</span></a>
+                <span class="home-footer__doodle" aria-hidden="true">✧</span>
+            </div>
+        </div>
+        <div class="home-container home-footer__main">
+            <div class="home-footer__brand">
+                <a class="home-brand home-brand--footer" href="#home">
+                    <span class="home-brand__word">EDU<span>SCOPE</span></span>
+                    <small>LEARNING CENTRE · SUKABUMI</small>
                 </a>
                 <p>Teman belajar untuk memahami pelajaran dan mencoba keterampilan baru.</p>
             </div>
-            <nav class="site-footer__nav" aria-label="Navigasi footer">
-                <p class="site-footer__label">Jelajahi</p>
+            <nav class="home-footer__links" aria-label="Navigasi footer">
+                <strong>Jelajahi</strong>
+                <a href="#program">Pilihan program</a>
                 <a href="#tentang">Tentang EDUSCOPE</a>
-                <a href="#program">Pilihan kelas</a>
-                <a href="#kontak">Hubungi kami</a>
+                <a href="#kenapa">Kenapa EDUSCOPE</a>
             </nav>
-            <div class="site-footer__action">
-                <span class="site-footer__badge" aria-hidden="true">&#10022;</span>
-                <p class="site-footer__label">Perlu bantuan memilih?</p>
-                <a class="site-footer__cta" href="#kontak">Tanyakan ke tim kami <span aria-hidden="true">&rarr;</span></a>
-            </div>
+            <nav class="home-footer__links" aria-label="Akun dan bantuan">
+                <strong>Butuh bantuan?</strong>
+                <a href="#kontak">Kirim pertanyaan</a>
+                <a href="<?= e(app_url('login.php')); ?>">Masuk ke akun</a>
+            </nav>
         </div>
-        <div class="site-footer__bottom container">
-            <p>&copy; <?= date('Y'); ?> EDUSCOPE. Belajar dengan langkah yang terasa pas.</p>
-            <a href="<?= e(app_url('login.php')); ?>">Akses pengelola <span aria-hidden="true">&nearr;</span></a>
+        <div class="home-container home-footer__bottom">
+            <p>&copy; <?= date('Y'); ?> EDUSCOPE Learning Centre. Belajar dengan langkah yang terasa pas.</p>
+            <a href="#home">Kembali ke atas ↑</a>
         </div>
     </footer>
+
     <script>
+        (() => {
+            const menuButton = document.querySelector('.home-menu-toggle');
+            const menuLinks = document.querySelector('#home-nav-links');
+
+            if (menuButton && menuLinks) {
+                const closeMenu = () => {
+                    menuButton.setAttribute('aria-expanded', 'false');
+                    menuButton.setAttribute('aria-label', 'Buka menu');
+                    menuLinks.classList.remove('is-open');
+                };
+
+                menuButton.addEventListener('click', () => {
+                    const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+                    menuButton.setAttribute('aria-expanded', String(!isOpen));
+                    menuButton.setAttribute('aria-label', isOpen ? 'Buka menu' : 'Tutup menu');
+                    menuLinks.classList.toggle('is-open', !isOpen);
+                });
+
+                menuLinks.querySelectorAll('a').forEach((link) => {
+                    link.addEventListener('click', closeMenu);
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') closeMenu();
+                });
+            }
+        })();
+
         (() => {
             const navigation = performance.getEntriesByType('navigation')[0];
             if (!navigation || navigation.type !== 'reload') return;
